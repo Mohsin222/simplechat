@@ -24,7 +24,7 @@ options: Options(
   contentType: 'application/json'
 ),
  ).then((value) {
-  print(value.data.toString()+ 'aaaaaaaaaaaaa');
+  // print(value.data.toString()+ 'aaaaaaaaaaaaa');
 var list =value.data as  List;
 
 
@@ -33,7 +33,7 @@ MsgModel messageModel =MsgModel.fromJson(element);
 
   messagesList.add(messageModel);
 }
-print(messagesList.toString()+ 'aaaaaaaaaaaaa');
+// print(messagesList.toString()+ 'aaaaaaaaaaaaa');
 
 return messagesList;
 }).catchError((e){

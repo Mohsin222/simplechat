@@ -43,7 +43,11 @@ app.use("/api/messages", messageRoutes);
 // });
 
 global.onlineUsers = new Map();
+
+var users =[]
 io.on("connection", (socket) => {
+
+
   console.log('CONNECTED')
   global.chatSocket = socket;
 
@@ -51,19 +55,29 @@ io.on("connection", (socket) => {
   socket.on("add-user", (userId) => {
     onlineUsers.set(userId, socket.id);
 
-    console.log(userId +'1463')
+    console.log(socket.id)
   });
 
   socket.on("send-msg", (data) => {
 
-    // console.log(data)
+
     
     const sendUserSocket = onlineUsers.get(data.to);
 
+    console.log(onlineUsers  ,'            ++12aaaaaaaaaaaaaaaaaaaaaaaaaa')
+    // socket.emit("msg-recieve", data);
+
+    console.log('msg REC ',data)
     if (sendUserSocket) {
       
-    console.log(sendUserSocket +'aaaaaaaaaaaaaaaaaaaaaaaaaa')
+    console.log(sendUserSocket +'aaa326aaaaaaaaaaaaaaaaaaaaaaa')
       socket.to(sendUserSocket).emit("msg-recieve", data);
     }
   });
+
+//   socket.on('disconnect', () => {
+//     onlineUsers.removeUser(user.id);
+// io.emit('dicconnect',user)
+  
+// })
 });

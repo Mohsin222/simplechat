@@ -98,6 +98,15 @@ makeImageNull();
  
    
     });
+
+        addNewMessage(
+
+MsgModel(message:  message,
+fromSelf: true,
+image:''
+
+)
+      );
        notifyListeners();
     });
          }

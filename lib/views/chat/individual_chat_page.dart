@@ -51,12 +51,15 @@ class _IndividualChatPageState extends State<IndividualChatPage> {
 //       );
          _messageInputController.clear();
 
-         msgProv.makeImageNull();
+        //  msgProv.makeImageNull();
 
   }
 @override
   void initState() {
+
+    
      var msgProv =Provider.of<MessageProvider>(context, listen: false);
+
     super.initState();
     //Important: If your server is running on localhost and you are testing your app on Android then replace http://localhost:3000 with http://10.0.2.2:3000
     msgProv.socket = IO.io(
@@ -88,18 +91,21 @@ userModel: userModel
    
  
    msgProv.socket.onConnectError((data) { print('Connect Error: $data');
-     
+    log('Connect Error');
           // ScaffoldMessenger.of(context).showSnackBar(snackbar(data));
     }
     );
     msgProv.socket.onDisconnect((data) {
       
+  log('DISCONNECT');
+
   
           // ScaffoldMessenger.of(context).showSnackBar(snackbar(data));
     });
     msgProv.socket.emit("add-user", Provider.of<AuthProvider>(context,listen:false).userModel.sId);
-
+// ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Connected')));
      msgProv.socket.onConnect((data) {
+        log('Connection established');
       print('Connection established');
        msgProv.socket.on("msg-recieve",
    (dd){
@@ -108,13 +114,13 @@ userModel: userModel
     log('GET MESSAGE'+dd['message'].toString());
 //     Provider.of<AuthProvider>(context, listen: false).addNewMessage(
 
+ MsgModel msgModel=MsgModel(message:  dd['message'],
+fromSelf: false,
+image: dd['image'] ?? ''
+);
+msgProv.addNewMessage(
+msgModel
 
-
- Provider.of<MessageProvider>(context, listen: false).addNewMessage(
-
-MsgModel(message:  dd['message'],
-fromSelf: false
-)
       );
 
 
@@ -149,6 +155,10 @@ fromSelf: false
 
   @override
   void dispose() {
+   _messageInputController.dispose();
+    //       var msgProv =Provider.of<MessageProvider>(context, listen: false);
+
+    //  msgProv.socket.emit("disconnect", Provider.of<AuthProvider>(context,listen:false).userModel.sId);
       // Provider.of<MessageProvider>(context, listen: false).socket.close();
     // TODO: implement dispose
     super.dispose();
@@ -169,6 +179,8 @@ fromSelf: false
                 padding: const EdgeInsets.all(16),
                 itemBuilder: (context, index) {
                   final message = provider.messagesList[index];
+
+           
                   print(message.image);
                   return Wrap(
                     alignment: message.fromSelf ==true
@@ -188,9 +200,16 @@ fromSelf: false
                                     ? CrossAxisAlignment.end
                                     : CrossAxisAlignment.start,
                             children: [
-                              if(message.imageFilePath !=null)
 
-Image.file(message.imageFilePath as File)        , 
+                                     InkWell(
+                                onTap: (){
+                                  print(message.image);
+                                },
+                                child: Container(
+                                  height: 50,
+                                  color: Colors.red,
+                                  child: Text(message.message.toString()))),
+                       
                      if( message.image !=null && message.image !='' && message.imageFilePath==null)
                               Image(image: NetworkImage(message.image.toString())),
                               Text(message.message.toString()),
