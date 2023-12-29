@@ -7,10 +7,12 @@ import 'package:chatapp2/provider/auth_provider.dart';
 import 'package:chatapp2/services/auth/auth_services.dart';
 import 'package:chatapp2/services/message_services/message_service.dart';
 import 'package:chatapp2/views/auth/login.dart';
+import 'package:chatapp2/widget/bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -25,37 +27,39 @@ class IndividualChatPage extends StatefulWidget {
 }
 
 class _IndividualChatPageState extends State<IndividualChatPage> {
-  late IO.Socket _socket;
+  // late IO.Socket socket;
   final TextEditingController _messageInputController = TextEditingController();
 
 
     _sendMessage() async{
+      var msgProv =Provider.of<MessageProvider>(context, listen: false);
    UserModel userModel=   Provider.of<AuthProvider>(context, listen: false).userModel;
     MessageService messageService =MessageService();
    await Provider.of<MessageProvider>(context, listen: false).sendMessage(clientId: widget.userModel!.sId!,userModel:userModel ,  message: _messageInputController.text.trim());
 
-   _socket.emit('send-msg', {
-      'to': widget.userModel!.sId,
-      'message':_messageInputController.text.trim()
-   
-    });
+
  
 
  
-    Provider.of<MessageProvider>(context, listen: false).addNewMessage(
+//     Provider.of<MessageProvider>(context, listen: false).addNewMessage(
 
-MsgModel(message:  _messageInputController.text.trim(),
-fromSelf: true
-)
-      );
+// MsgModel(message:  _messageInputController.text.trim(),
+// fromSelf: true,
+// image: ''
+
+// )
+//       );
          _messageInputController.clear();
+
+         msgProv.makeImageNull();
 
   }
 @override
   void initState() {
+     var msgProv =Provider.of<MessageProvider>(context, listen: false);
     super.initState();
     //Important: If your server is running on localhost and you are testing your app on Android then replace http://localhost:3000 with http://10.0.2.2:3000
-    _socket = IO.io(
+    msgProv.socket = IO.io(
       Platform.isIOS ? 'http://192.168.18.72:5000' : 'http://192.168.18.72:5000',
  <String, dynamic>{
       "transports": ["websocket"],
@@ -67,7 +71,7 @@ fromSelf: true
       // .setQuery(
       //     {'username': widget.userModel!.username}).build(),
     );
-       _socket.connect();
+       msgProv.socket.connect();
     _connectSocket();
    UserModel userModel=   Provider.of<AuthProvider>(context, listen: false).userModel;
       WidgetsBinding.instance.addPostFrameCallback((_)  => {
@@ -80,34 +84,31 @@ userModel: userModel
   });
   }
   _connectSocket() {
-
+      var msgProv =Provider.of<MessageProvider>(context, listen: false);
    
  
-    _socket.onConnectError((data) { print('Connect Error: $data');
+   msgProv.socket.onConnectError((data) { print('Connect Error: $data');
      
           // ScaffoldMessenger.of(context).showSnackBar(snackbar(data));
     }
     );
-    _socket.onDisconnect((data) {
+    msgProv.socket.onDisconnect((data) {
       
   
           // ScaffoldMessenger.of(context).showSnackBar(snackbar(data));
     });
-     _socket.emit("add-user", Provider.of<AuthProvider>(context,listen:false).userModel.sId);
+    msgProv.socket.emit("add-user", Provider.of<AuthProvider>(context,listen:false).userModel.sId);
 
-      _socket.onConnect((data) {
+     msgProv.socket.onConnect((data) {
       print('Connection established');
-       _socket.on("msg-recieve",
+       msgProv.socket.on("msg-recieve",
    (dd){
 
 
     log('GET MESSAGE'+dd['message'].toString());
 //     Provider.of<AuthProvider>(context, listen: false).addNewMessage(
 
-// MsgModel(message:  dd['message'].toString(),
-// fromSelf: false
-// )
-//       );
+
 
  Provider.of<MessageProvider>(context, listen: false).addNewMessage(
 
@@ -121,15 +122,7 @@ fromSelf: false
 
          
    }
-//     (data) {
-    
-//     Provider.of<AuthProvider>(context, listen: false).addNewMessage(
 
-// MsgModel(message:  data.toString(),
-// fromSelf: true
-// )
-//       );
-//    }
    );
   
     });
@@ -150,16 +143,22 @@ fromSelf: false
           );
   }
 
+
+
+
+
   @override
   void dispose() {
+      // Provider.of<MessageProvider>(context, listen: false).socket.close();
     // TODO: implement dispose
     super.dispose();
-    _socket.dispose();
+ 
+  //  msgProv.socket.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-      // final authProv = Provider.of<AuthProvider>(context,listen:false).getMessageChart(clientId: widget.userModel!.sId!);
+   final msgProvider = Provider.of<MessageProvider>(context,listen:false);
     return  Scaffold(
       appBar: AppBar(title: Text(widget.userModel!.username ?? ''),),
 
@@ -170,6 +169,7 @@ fromSelf: false
                 padding: const EdgeInsets.all(16),
                 itemBuilder: (context, index) {
                   final message = provider.messagesList[index];
+                  print(message.image);
                   return Wrap(
                     alignment: message.fromSelf ==true
                         ? WrapAlignment.end
@@ -188,6 +188,11 @@ fromSelf: false
                                     ? CrossAxisAlignment.end
                                     : CrossAxisAlignment.start,
                             children: [
+                              if(message.imageFilePath !=null)
+
+Image.file(message.imageFilePath as File)        , 
+                     if( message.image !=null && message.image !='' && message.imageFilePath==null)
+                              Image(image: NetworkImage(message.image.toString())),
                               Text(message.message.toString()),
                               //  Text(.toString()),
                               // Text(
@@ -208,6 +213,20 @@ fromSelf: false
               ),
             ),
           ),
+   
+          Consumer<MessageProvider>(
+            builder: (context,val,_) {
+              return val.image !=null ? GestureDetector(
+              onLongPress: (){
+                val.makeImageNull();
+              },
+                child: Container(
+                  height: 100,
+                  width: 90,
+                  child: Image.file(val.image!)),
+              ):Container();
+            }
+          ),
                   Container(
             decoration: BoxDecoration(
               color: Colors.grey.shade200,
@@ -226,6 +245,18 @@ fromSelf: false
                         border: InputBorder.none,
                       ),
                     ),
+                  ),
+                       IconButton(
+                    onPressed: ()async {
+                    showModalBottomSheet(
+                    context: context,
+                    builder: (context) {
+return BottomSheetWidget(onpress: ()async{
+ await msgProvider.openImagePicker(context);
+},);
+                    });
+                    },
+                    icon: const Icon(Icons.image),
                   ),
                   IconButton(
                     onPressed: ()async {
