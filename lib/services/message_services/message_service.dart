@@ -2,7 +2,10 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:chatapp2/model/msg_model.dart';
+import 'package:chatapp2/model/room_mode.dart';
 import 'package:dio/dio.dart';
+
+import '../../model/user_model.dart';
 
 class MessageService{
   List<MsgModel> messagesList =[];
@@ -129,6 +132,46 @@ else {
     // Handle exception
     print("Exception during image upload: $e");
   }
+}
+
+
+
+
+
+
+
+//send messagess
+Future<RoomModel> createRoom({required UserModel clinetModel ,required UserModel myModel})async{
+  var headers = {
+  'Content-Type': 'application/json'
+};
+var data = json.encode({
+  "clientModel": clinetModel,
+  "myModel":myModel,
+ 
+});
+var dio = Dio();
+var response = await dio.request(
+  'http://192.168.18.72:5000/api/messages/createRoom/',
+  options: Options(
+    method: 'POST',
+    headers: headers,
+  ),
+  data: data,
+);
+
+if (response.statusCode == 200) {
+
+  // var res= json.encode(response.data);
+  print(response.data['data'].toString() +'created');
+RoomModel roomModel =RoomModel.fromJson(response.data['data'][0]);
+  return    roomModel;
+}
+else {
+  print(response.statusMessage.toString() +'aaaaaaaaaaaa');
+
+  throw  Exception('Error');
+}
 }
 
 }

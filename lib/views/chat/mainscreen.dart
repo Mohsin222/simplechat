@@ -1,10 +1,13 @@
 import 'package:chatapp2/model/user_model.dart';
 import 'package:chatapp2/provider/auth_provider.dart';
+import 'package:chatapp2/provider/message_provider.dart';
 import 'package:chatapp2/views/chat/individual_chat_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:provider/provider.dart';
+
+import '../../services/message_services/message_service.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -58,7 +61,11 @@ final UserModel? userModel;
   @override
   Widget build(BuildContext context) {
     return  ListTile(
-      onTap: (){
+      onTap: ()async{
+        final authProv =Provider.of<AuthProvider>(context,listen: false);
+             final msgProv =Provider.of<MessageProvider>(context,listen: false);
+        // MessageService messageService =MessageService();
+await  msgProv.getRoomId(clinetModel: userModel!, myModel: authProv.userModel);
         Navigator.push(context, MaterialPageRoute(builder: (context)=> IndividualChatPage(userModel: userModel,)));
       },
       title: Text(userModel!.username ?? ''),

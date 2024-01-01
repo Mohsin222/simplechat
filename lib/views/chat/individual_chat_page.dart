@@ -27,7 +27,7 @@ class IndividualChatPage extends StatefulWidget {
 }
 
 class _IndividualChatPageState extends State<IndividualChatPage> {
-  // late IO.Socket socket;
+  late IO.Socket socket;
   final TextEditingController _messageInputController = TextEditingController();
 
 
@@ -62,7 +62,7 @@ class _IndividualChatPageState extends State<IndividualChatPage> {
 
     super.initState();
     //Important: If your server is running on localhost and you are testing your app on Android then replace http://localhost:3000 with http://10.0.2.2:3000
-    msgProv.socket = IO.io(
+    socket = IO.io(
       Platform.isIOS ? 'http://192.168.18.72:5000' : 'http://192.168.18.72:5000',
  <String, dynamic>{
       "transports": ["websocket"],
@@ -74,7 +74,8 @@ class _IndividualChatPageState extends State<IndividualChatPage> {
       // .setQuery(
       //     {'username': widget.userModel!.username}).build(),
     );
-       msgProv.socket.connect();
+      msgProv.socket=socket;
+socket.connect();
     _connectSocket();
    UserModel userModel=   Provider.of<AuthProvider>(context, listen: false).userModel;
       WidgetsBinding.instance.addPostFrameCallback((_)  => {
@@ -102,18 +103,21 @@ userModel: userModel
   
           // ScaffoldMessenger.of(context).showSnackBar(snackbar(data));
     });
-    msgProv.socket.emit("add-user", Provider.of<AuthProvider>(context,listen:false).userModel.sId);
+    msgProv.socket.emit("add-user", msgProv.roomModel!.sId);
 // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Connected')));
      msgProv.socket.onConnect((data) {
         log('Connection established');
       print('Connection established');
+
+      msgProv.socket.on("userConnected",(d){
+        log(d.toString());
+      });
        msgProv.socket.on("msg-recieve",
    (dd){
 
 
     log('GET MESSAGE'+dd['message'].toString());
 //     Provider.of<AuthProvider>(context, listen: false).addNewMessage(
-
  MsgModel msgModel=MsgModel(message:  dd['message'],
 fromSelf: false,
 image: dd['image'] ?? ''
@@ -156,21 +160,33 @@ msgModel
   @override
   void dispose() {
    _messageInputController.dispose();
-    //       var msgProv =Provider.of<MessageProvider>(context, listen: false);
+          // var msgProv =Provider.of<MessageProvider>(context, listen: false);
 
     //  msgProv.socket.emit("disconnect", Provider.of<AuthProvider>(context,listen:false).userModel.sId);
-      // Provider.of<MessageProvider>(context, listen: false).socket.close();
+    
     // TODO: implement dispose
     super.dispose();
- 
+//  msgProv.socket.emit('disconnect',{
+//   "roomId":msgProv.roomModel!.sId
+//  });
   //  msgProv.socket.dispose();
+      // WidgetsBinding.instance.addPostFrameCallback((_)  => {
+
+    // TODO: implement initState
+if(mounted){
+  socket.dispose();
+}
+  // });
   }
 
   @override
   Widget build(BuildContext context) {
    final msgProvider = Provider.of<MessageProvider>(context,listen:false);
     return  Scaffold(
-      appBar: AppBar(title: Text(widget.userModel!.username ?? ''),),
+      appBar: AppBar(title: Text(widget.userModel!.username ?? ''),
+      
+      actions: [Text(msgProvider.roomModel!.sId.toString()),SizedBox(width: 10,)],
+      ),
 
       body: Column(children: [
             Expanded(
@@ -201,14 +217,7 @@ msgModel
                                     : CrossAxisAlignment.start,
                             children: [
 
-                                     InkWell(
-                                onTap: (){
-                                  print(message.image);
-                                },
-                                child: Container(
-                                  height: 50,
-                                  color: Colors.red,
-                                  child: Text(message.message.toString()))),
+                            
                        
                      if( message.image !=null && message.image !='' && message.imageFilePath==null)
                               Image(image: NetworkImage(message.image.toString())),

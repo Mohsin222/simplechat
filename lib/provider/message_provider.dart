@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:chatapp2/model/room_mode.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:chatapp2/model/user_model.dart';
 import 'package:chatapp2/services/auth/auth_services.dart';
@@ -12,6 +13,8 @@ import '../model/msg_model.dart';
 
 class MessageProvider extends  ChangeNotifier {
   List<MsgModel> messagesList =[];
+   RoomModel? roomModel =RoomModel();
+        MessageService messageService =MessageService();
       late IO.Socket socket;
        getMessageChart({required String clientId , required UserModel userModel})async{
     log('aaaaaaaaaaaaaaa');
@@ -54,7 +57,7 @@ notifyListeners();
  
        sendMessage({required String clientId, required UserModel userModel ,required String? message})async{
     log('aaaaaaaaaaaaaaa');
-         MessageService messageService =MessageService();
+    
 
          if(image !=null) {
          await messageService.uploadImageToCloudinary(image!.path).then((value)async {
@@ -62,6 +65,7 @@ notifyListeners();
         await     messageService.sendMessage(clientId: clientId,myId: userModel.sId!,message: message,image: value).then((val){
 
 socket.emit('send-msg', {
+    'roomId':roomModel!.sId,
       'to': clientId,
       'message':message,
       'image':value
@@ -92,6 +96,7 @@ makeImageNull();
     await messageService.sendMessage(clientId: clientId,myId: userModel.sId!,message: message).then((value){
 
      socket.emit('send-msg', {
+      'roomId':roomModel!.sId,
       'to': clientId,
       'message':message,
       'image':''
@@ -112,4 +117,22 @@ image:''
          }
             
   }
+
+
+
+
+
+
+getRoomId({required UserModel clinetModel ,required UserModel myModel})async{
+  roomModel=null;
+roomModel =await messageService.createRoom(clinetModel: clinetModel, myModel: myModel);
+
+notifyListeners();
+}
+
+
+
+
+
+
 }

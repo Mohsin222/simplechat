@@ -52,28 +52,53 @@ io.on("connection", (socket) => {
   global.chatSocket = socket;
 
 
-  socket.on("add-user", (userId) => {
-    onlineUsers.set(userId, socket.id);
+  socket.on("add-user", (roomId) => {
+    // onlineUsers.set(userId, socket.id);
 
-    console.log(socket.id)
+    console.log('USER CONNECTED')
+    socket.join(roomId)
+
+
+
+    io.to(roomId).emit("userConnected", 'New User');
   });
 
   socket.on("send-msg", (data) => {
 
 
     
-    const sendUserSocket = onlineUsers.get(data.to);
+    // const sendUserSocket = onlineUsers.get(data.to);
 
-    console.log(onlineUsers  ,'            ++12aaaaaaaaaaaaaaaaaaaaaaaaaa')
+    console.log(onlineUsers   + data  ,'            ++12aaaaaaaaaaaaaaaaaaaaaaaaaa')
     // socket.emit("msg-recieve", data);
 
     console.log('msg REC ',data)
-    if (sendUserSocket) {
+    // if (sendUserSocket) {
       
-    console.log(sendUserSocket +'aaa326aaaaaaaaaaaaaaaaaaaaaaa')
-      socket.to(sendUserSocket).emit("msg-recieve", data);
-    }
+    // console.log(sendUserSocket +'aaa326aaaaaaaaaaaaaaaaaaaaaaa')
+    //   // socket.to(sendUserSocket).emit("msg-recieve", data);
+    
+    //   io.to("11").emit("msg-recieve", data);
+    // }
+ 
+    socket.to(data.roomId).emit("msg-recieve", data);
   });
+
+  socket.on('disconnect', (d) => {
+    console.log('DISCONNECTED')
+
+    // socket.leave(rommId)
+    // const user = removeUser(socket.id)
+
+    // if (user) {
+        // io.to(user.room).emit('message', generateMessage('Admin', `${user.username} has left!`))
+        // io.to(user.room).emit('roomData', {
+        //     room: user.room,
+        //     users: getUsersInRoom(user.room)
+        // })
+    // }
+})
+
 
 //   socket.on('disconnect', () => {
 //     onlineUsers.removeUser(user.id);

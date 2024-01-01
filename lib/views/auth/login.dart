@@ -6,6 +6,8 @@ import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
+import '../../services/message_services/message_service.dart';
+
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
 
