@@ -9,28 +9,45 @@ import 'package:get/get.dart';
 class AuthProvider extends ChangeNotifier{
   
 
+
+   bool _isLoading = false;
+  bool get isLoading => _isLoading;
+  set isLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+
 UserModel userModel = UserModel();
   List<UserModel> usersList= [];
-     login({required String email ,required String username})async{
+  
+login({required String email ,required String username,required BuildContext context})async{
+  isLoading=true;
+  await _login(email: email,username: username,context: context);
+   isLoading=false;
+
+   notifyListeners();
+}
+
+     _login({required String email ,required String username ,required BuildContext context})async{
     log('aaaaaaaaaaaaaaa');
        AuthServices authServices =AuthServices();
 
-    await authServices.login(email:email,username :username).then((value)async{
+    await authServices.login(email:email,username :username,context: context).then((value)async{
 userModel = value;
  
- await allUsers();
+ await allUsers(context: context);
  print(userModel.email.toString() + userModel.username.toString());
-       notifyListeners();
+      //  notifyListeners();
     });
             
   }
 
 
-       allUsers()async{
+       allUsers({required BuildContext context})async{
     log('aaaaaaaaaaaaaaa');
        AuthServices authServices =AuthServices();
 
-    await authServices.getAllUser(userModel.sId.toString()).then((value){
+    await authServices.getAllUser(userid:  userModel.sId.toString(),context: context).then((value){
 
  usersList.assignAll(value);
 

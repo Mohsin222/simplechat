@@ -2,12 +2,15 @@ import 'dart:convert';
 
 import 'package:chatapp2/model/msg_model.dart';
 import 'package:chatapp2/model/user_model.dart';
+import 'package:chatapp2/provider/auth_provider.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 const baseURl ="http://192.168.18.72:5000/";
 class AuthServices{
 
 
-Future<UserModel> login({required String email ,required String username})async{
+Future<UserModel> login({required String email ,required String username,required BuildContext context})async{
 
   Dio dio =Dio();
 
@@ -27,7 +30,8 @@ UserModel  userModel =UserModel.fromJson(value.data['user']);
 
 return userModel;
 }).catchError((e){
-print(e);
+  Provider.of<AuthProvider>(context, listen: false).isLoading=false;
+print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa2345677');
   return Exception('error');  
 });
 
@@ -36,7 +40,7 @@ print(e);
 
 
 
-Future<List<UserModel>> getAllUser(String userid)async{
+Future<List<UserModel>> getAllUser({required String userid ,required BuildContext context})async{
 
 
 List<UserModel> users=[];
@@ -62,6 +66,7 @@ UserModel  userModel =UserModel.fromJson(element);
 }
 return users;
 }).catchError((e){
+    Provider.of<AuthProvider>(context, listen: false).isLoading=false;
 print(e);
   return Exception('error');  
 });

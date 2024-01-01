@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 import '../../services/message_services/message_service.dart';
+import '../../utils/text_field_decoration.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -37,23 +38,28 @@ body: Container(
   child: Column(
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
-          SizedBox(height: 40,),
+      const    SizedBox(height: 40,),
       TextField(
         controller: emailController,
+        decoration: TextFieldClass.inputDecoration(context, hintText: 'Email'),
       ),
-      SizedBox(height: 10,),
+   const   SizedBox(height: 10,),
       TextField(
         controller: nameController,
+           decoration: TextFieldClass.inputDecoration(context, hintText: 'userName'),
       ),
-      SizedBox(height: 10,),
-      Center(
-  child: ElevatedButton(onPressed: ()async{
-await authprov.login(email:emailController.text.trim(),username: nameController.text.trim());
+ const     SizedBox(height: 10,),
+      Consumer<AuthProvider>(
+        builder: (context,val,_) {
+          return ElevatedButton(onPressed:val.isLoading == true ?null :()async{
+await val.login(email:emailController.text.trim(),username: nameController.text.trim(),context: context);
 
 
-Navigator.push(context, MaterialPageRoute(builder: (context) => MainScreen(),));
-  }, child: Text('LOGIN')),
-),
+ Navigator.push(context, MaterialPageRoute(builder: (context) => MainScreen(),));
+          } ,
+           child:val.isLoading == false ? Text('LOGIN') : Center(child: CircularProgressIndicator(),));
+        }
+      ),
     ],
   ),
 )
