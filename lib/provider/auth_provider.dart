@@ -57,5 +57,25 @@ userModel = value;
             
   }
 
+register({required String email ,required String password, required String username,required BuildContext context})async{
+  isLoading=true;
+  await _register(email: email,username: username, password: password, context: context);
+   isLoading=false;
 
+   notifyListeners();
+}
+
+   _register({required String email ,required String password,  required String username ,required BuildContext context})async{
+    log('aaaaaaaaaaaaaaa');
+       AuthServices authServices =AuthServices();
+
+    await authServices.register(email:email,username :username,password: password,  context: context).then((value)async{
+userModel = value;
+ 
+ await allUsers(context: context);
+ print(userModel.email.toString() + userModel.username.toString());
+      //  notifyListeners();
+    });
+            
+  }
 }

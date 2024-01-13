@@ -3,6 +3,7 @@ import 'package:chatapp2/model/user_model.dart';
 import 'package:chatapp2/provider/auth_provider.dart';
 import 'package:chatapp2/provider/message_provider.dart';
 import 'package:chatapp2/views/chat/individual_chat_page.dart';
+import 'package:chatapp2/views/chat/widget/user_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
@@ -86,7 +87,7 @@ class _MainScreenState extends State<MainScreen> {
                     style: TextStyle(
                       fontSize: 22.829790115356445,
                       fontWeight: FontWeight.w400,
-                      color:ColorsClass.primaryColorLight
+                      color:ColorsClass.primaryTextColorLight
                     )),
                 Text("See All",
                     style: TextStyle(
@@ -130,7 +131,7 @@ class _MainScreenState extends State<MainScreen> {
 style: TextStyle(
 fontSize: 18,
 fontWeight: FontWeight.w400,
-color: ColorsClass.primaryColorLight
+color: ColorsClass.primaryTextColorLight
 )
 )
                           ],
@@ -158,7 +159,22 @@ CustomMainBottomSheet(
                child: ListView.builder(
                 itemCount: val.usersList.length,
                 itemBuilder: (context,index){
-                return UserTile(userModel: val.usersList[index],);
+                return UserTile(userModel: val.usersList[index],
+                onPress: () async {
+        final authProv = Provider.of<AuthProvider>(context, listen: false);
+        final msgProv = Provider.of<MessageProvider>(context, listen: false);
+        // MessageService messageService =MessageService();
+        await msgProv.getRoomId(
+            clinetModel: val.usersList[index], myModel: authProv.userModel);
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => IndividualChatPage(
+                      userModel: val.usersList[index],
+                    )));
+      },
+                
+                );
                        }),
              )
               ],
@@ -178,53 +194,3 @@ CustomMainBottomSheet(
   }
 }
 
-class UserTile extends StatelessWidget {
-  const UserTile({super.key, this.userModel});
-  final UserModel? userModel;
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      onTap: () async {
-        final authProv = Provider.of<AuthProvider>(context, listen: false);
-        final msgProv = Provider.of<MessageProvider>(context, listen: false);
-        // MessageService messageService =MessageService();
-        await msgProv.getRoomId(
-            clinetModel: userModel!, myModel: authProv.userModel);
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => IndividualChatPage(
-                      userModel: userModel,
-                    )));
-      },
-      // title: Text(userModel!.username ?? '',),
-
-      leading: Container(
-        width: 55,
-height: 55,
-decoration: BoxDecoration(
-  shape: BoxShape.circle,
-  color: Colors.amberAccent
-),
-      ),
-    title:  Text(
-userModel!.username ?? '',
-style: TextStyle(
-fontSize: 18,
-color: ColorsClass.primaryColorDark,
-fontWeight: FontWeight.w500,
-)
-),
-      // subtitle: Text(userModel!.email ?? ''),
-      subtitle: Text(
-userModel!.email ?? '',
-style: TextStyle(
-fontSize: 18,
-fontWeight: FontWeight.w300,
-color: ColorsClass.primaryColorDark
-)
-),
-    );
-  }
-}

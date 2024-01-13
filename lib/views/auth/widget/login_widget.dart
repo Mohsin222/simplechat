@@ -59,13 +59,23 @@ TextEditingController userNameController =TextEditingController();
            TextFormField(
             controller: emailController,
           decoration: TextFieldClass.inputDecoration(context, hintText: 'Email',suffixIcon:const Icon(Icons.person)),
-            ),
+                        validator: (value) {
+    if (value == null || value.isEmpty) {     
+return 'Please enter email';
+    }
+    return null;
+  },  ),
             
             spacing,
             TextFormField(
               controller: userNameController,
           decoration: TextFieldClass.inputDecoration(context, hintText: 'userName',suffixIcon: Icon(Icons.person)),
-            ),
+                       validator: (value) {
+    if (value == null || value.isEmpty) {     
+return 'Please enter userName';
+    }
+    return null;
+  },   ),
                
               
           spacing,
@@ -76,10 +86,14 @@ TextEditingController userNameController =TextEditingController();
                 childText: 'Login',
                 loading: val.isLoading,
                 onPress:val.isLoading == true ?null :()async{
+
+                  if (loginFormKey.currentState!.validate()) {
 await val.login(email:emailController.text.trim(),username: userNameController.text.trim(),context: context);
 
 
- Navigator.push(context, MaterialPageRoute(builder: (context) => MainScreen(),));
+ Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainScreen(),));
+         
+                  }
           } ,
                 );
               }

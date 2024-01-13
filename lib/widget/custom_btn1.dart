@@ -28,7 +28,7 @@ final bool? loading;
 
         ) : Text(childText ?? '',
             style: TextStyle(
-              color:baclgroundColor ==null ? ColorsClass.primaryColorLight :ColorsClass.primaryColorDark,
+              color:baclgroundColor ==null ? ColorsClass.primaryTextColorLight :ColorsClass.primaryTextColorDark,
               fontSize: 20.sp,
               fontWeight: FontWeight.w600,
             )),
