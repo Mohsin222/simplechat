@@ -56,7 +56,7 @@ module.exports.register = async (req, res, next) => {
 
 module.exports.getAllUsers = async (req, res, next) => {
 
-
+console.log('HIOTTTTTTTTTTTT');
   try {
     const users = await User.find({ _id: { $ne: req.userId } }).select([
       "email",
@@ -66,36 +66,38 @@ module.exports.getAllUsers = async (req, res, next) => {
     ]);
     return res.json(users);
   } catch (ex) {
-    next(ex);
-  }
-};
-
-
-
-
-
-module.exports.register = async (req, res, next) => {
-  try {
-    const { username, email, password } = req.body;
-    const usernameCheck = await User.findOne({ username });
-    if (usernameCheck)
-      return res.status(400).json({ msg: "Username already used", status: false });
-    const emailCheck = await User.findOne({ email });
-    if (emailCheck)
-      return res.status(400).json({ msg: "Email already used", status: false });
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({
-      email,
-      username,
-      password: hashedPassword,
-    });
-    delete user.password;
-    return res.status(400).json({ status: true, user });
-  } catch (ex) {
     return res.status(400).json({ status: false, error:ex });
+
     next(ex);
   }
 };
+
+
+
+
+
+// module.exports.register = async (req, res, next) => {
+//   try {
+//     const { username, email, password } = req.body;
+//     const usernameCheck = await User.findOne({ username });
+//     if (usernameCheck)
+//       return res.status(400).json({ msg: "Username already used", status: false });
+//     const emailCheck = await User.findOne({ email });
+//     if (emailCheck)
+//       return res.status(400).json({ msg: "Email already used", status: false });
+//     const hashedPassword = await bcrypt.hash(password, 10);
+//     const user = await User.create({
+//       email,
+//       username,
+//       password: hashedPassword,
+//     });
+//     delete user.password;
+//     return res.status(400).json({ status: true, user });
+//   } catch (ex) {
+//     return res.status(400).json({ status: false, error:ex });
+//     next(ex);
+//   }
+// };
 
 
 

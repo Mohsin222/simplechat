@@ -28,13 +28,15 @@ module.exports.userDetails = async (req, res) => {
 
 try {
 
-    const {password, username, image}=req.body
+    const {
+      // password, 
+      username, image}=req.body
     const userData = await User.findByIdAndUpdate(
         req.userId,
         {
-            username:username,
+          username:username,
             avatarImage:     image,
-            password:password
+            // password:password
         },
         { new: true }
       );

@@ -16,9 +16,14 @@ final double? height;
 
  static  showSheet({required BuildContext context, required Widget child, double? height}){
     return    showModalBottomSheet(
+      
                     context: context,
-                     isScrollControlled: true,
+                    //  isScrollControlled: true,
+       
+                    // clipBehavior:Clip.hardEdge ,
+                     
   isDismissible: false,
+  isScrollControlled: false,
                          shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(
                     top: Radius.circular(20.0),
@@ -39,13 +44,16 @@ return CustomMainBottomSheet(child: child,height: height,);
   Widget build(BuildContext context) {
     return   Container(
       decoration: BoxDecoration(
-              color: ColorsClass.backgroundColorLight,
+              // color: ColorsClass.backgroundColorLight,
+              // color: Theme.of(context).cardColor,
+              color: Colors.black,
                  borderRadius: BorderRadius.vertical(
       top: Radius.circular(20.0),
     ),
         // borderRadius: BorderRadius.only(topLeft: Radius.circular(14.r),topRight:  Radius.circular(14.r))
       ),
-      height: height ?? 0.7.sh,
+      height: height ?? 0.5.sh,
+      width: double.infinity,
     child: child,
     );
 

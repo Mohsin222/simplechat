@@ -8,8 +8,6 @@ import 'package:get/get.dart';
 
 class AuthProvider extends ChangeNotifier{
   
-
-
    bool _isLoading = false;
   bool get isLoading => _isLoading;
   set isLoading(bool value) {
@@ -33,8 +31,9 @@ login({required String email ,required String username,required BuildContext con
        AuthServices authServices =AuthServices();
 
     await authServices.login(email:email,username :username,context: context).then((value)async{
-userModel = value;
+  userModel = value;
  
+if(userModel.sId !=null)
  await allUsers(context: context);
  print(userModel.email.toString() + userModel.username.toString());
       //  notifyListeners();

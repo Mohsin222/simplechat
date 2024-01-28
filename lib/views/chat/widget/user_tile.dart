@@ -49,7 +49,7 @@ userModel!.username ?? '',
 style: TextStyle(
 fontSize: 18.sp,
 // color: ColorsClass.primaryTextColorDark,
-color: ColorsClass.textColor2,
+color:Colors.white,
 fontWeight: FontWeight.w500,
 )
 ),

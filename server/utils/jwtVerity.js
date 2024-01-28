@@ -17,7 +17,7 @@ const checkToken = function (req,res,next)
      }
      else
      {
-        res.sendStatus(403);
+      return  res.status(403).json({error:'Not Authorizes'});
      }
     }
 module.exports ={checkToken}

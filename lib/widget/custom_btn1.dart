@@ -15,13 +15,17 @@ final bool? loading;
     return InkWell(
       onTap: onPress,
       child: Container(
+         
         // width: 281,
         width: double.infinity,
         height: 60.sp,
         decoration: BoxDecoration(
+     
           border: Border.all(width: 2.w ,color:ColorsClass.backgroundColorDark ),
             borderRadius: BorderRadius.circular(15.r),
-            color:baclgroundColor ==null? ColorsClass.backgroundColorDark :ColorsClass.backgroundColorLight ),
+            color:baclgroundColor ==null? ColorsClass.backgroundColorDark :ColorsClass.backgroundColorLight
+            
+             ),
         alignment: Alignment.center,
         child:loading ==true ? CircularProgressIndicator(
 

@@ -32,6 +32,14 @@ mongoose
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/user", userRoute);
+
+
+
+
+
+
+
+
  server.listen(process.env.PORT, () =>
   console.log(`Server started on ${process.env.PORT}`)
 );
@@ -43,7 +51,7 @@ app.use("/api/user", userRoute);
 
 // });
 
-global.onlineUsers = new Map();
+// global.onlineUsers = new Map();
 
 var users =[]
 io.on("connection", (socket) => {
@@ -70,7 +78,7 @@ io.on("connection", (socket) => {
     
     // const sendUserSocket = onlineUsers.get(data.to);
 
-    console.log(onlineUsers   + data  ,'            ++12aaaaaaaaaaaaaaaaaaaaaaaaaa')
+    // console.log(onlineUsers   + data  ,'            ++12aaaaaaaaaaaaaaaaaaaaaaaaaa')
     // socket.emit("msg-recieve", data);
 
     console.log('msg REC ',data)
