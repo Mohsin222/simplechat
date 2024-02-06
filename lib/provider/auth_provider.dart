@@ -8,29 +8,55 @@ import 'package:get/get.dart';
 
 class AuthProvider extends ChangeNotifier{
   
+
+
+
+  //for login
    bool _isLoading = false;
   bool get isLoading => _isLoading;
+bool showPass=false;
+
+   showPassword(bool value) {
+    value==true ? showPass=false : showPass=true;
+   
+    notifyListeners();
+  }
+
+
   set isLoading(bool value) {
     _isLoading = value;
     notifyListeners();
   }
 
+
+late TextEditingController emailController;
+ late TextEditingController passwordController ;
+  late  TextEditingController userNameController;
+
 UserModel userModel = UserModel();
   List<UserModel> usersList= [];
+
+
+   AuthProvider(){
+    emailController = TextEditingController();
+    passwordController = TextEditingController(); 
+     userNameController = TextEditingController();
+  }
+ 
   
-login({required String email ,required String username,required BuildContext context})async{
+login({required String email ,required String password,required BuildContext context})async{
   isLoading=true;
-  await _login(email: email,username: username,context: context);
+  await _login(email: email,password: password,context: context);
    isLoading=false;
 
    notifyListeners();
 }
 
-     _login({required String email ,required String username ,required BuildContext context})async{
-    log('aaaaaaaaaaaaaaa');
+     _login({required String email ,required String password ,required BuildContext context})async{
+
        AuthServices authServices =AuthServices();
 
-    await authServices.login(email:email,username :username,context: context).then((value)async{
+    await authServices.login(email:email,password :password,context: context).then((value)async{
   userModel = value;
  
 if(userModel.sId !=null)
@@ -76,5 +102,17 @@ userModel = value;
       //  notifyListeners();
     });
             
+  }
+
+
+
+
+
+    @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    userNameController.dispose();
+    super.dispose();
   }
 }

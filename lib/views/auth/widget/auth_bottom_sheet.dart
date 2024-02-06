@@ -9,14 +9,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../widget/custom_btn1.dart';
 
 class CustomMainBottomSheet extends StatelessWidget {
-   CustomMainBottomSheet({super.key, required this.child, this.height});
+   const CustomMainBottomSheet({super.key, required this.child, this.height});
 final Widget child;
 final double? height;
 
 
  static  showSheet({required BuildContext context, required Widget child, double? height}){
     return    showModalBottomSheet(
-      
+     elevation: 20,
                     context: context,
                     //  isScrollControlled: true,
        
@@ -44,11 +44,12 @@ return CustomMainBottomSheet(child: child,height: height,);
   Widget build(BuildContext context) {
     return   Container(
       decoration: BoxDecoration(
+        // color:Colors.black.withOpacity(0.1),
               // color: ColorsClass.backgroundColorLight,
               // color: Theme.of(context).cardColor,
-              color: Colors.black,
+              // color: Colors.black,
                  borderRadius: BorderRadius.vertical(
-      top: Radius.circular(20.0),
+      top: Radius.circular(20.0.r),
     ),
         // borderRadius: BorderRadius.only(topLeft: Radius.circular(14.r),topRight:  Radius.circular(14.r))
       ),

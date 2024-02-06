@@ -131,7 +131,7 @@ body :NestedScrollView(
                     return Container(
                              decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.only(
+        borderRadius:const BorderRadius.only(
           topLeft: Radius.circular(20.0),
           topRight: Radius.circular(20.0),
         ),

@@ -29,14 +29,15 @@ class AuthServices {
   );
   Future login(
       {required String email,
-      required String username,
+      required String password,
       required BuildContext context}) async {
     Dio dio = Dio();
 
     return dio.post(baseURl + "api/auth/login", data: {
-      "username": username,
+     
       "email": email,
-      "password": "123"
+       "password": password,
+      // "password": "123"
     }).then((value) {
       log(value.statusCode.toString() + '123589-');
       Provider.of<AuthProvider>(context, listen: false).isLoading = false;

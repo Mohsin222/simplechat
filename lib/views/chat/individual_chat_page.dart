@@ -188,7 +188,7 @@ if(mounted){
    final msgProvider = Provider.of<MessageProvider>(context,listen:false);
    final authProvider = Provider.of<AuthProvider>(context,listen:false);
     return  Scaffold(
-         backgroundColor: ColorsClass.backgroundColorDark,
+        //  backgroundColor: ColorsClass.backgroundColorDark,
       // appBar: AppBar(title: Text(widget.userModel!.username ?? ''),
       
       // actions: [Text(msgProvider.roomModel!.sId.toString()),SizedBox(width: 10,)],
@@ -255,6 +255,7 @@ widget.userModel!.username.toString(),
           
              
                 CustomMainBottomSheet(
+                  
                   height: 0.7.sh,
                   child: Consumer<MessageProvider>(
                     builder: (_, provider, __) => ListView.separated(
@@ -391,24 +392,29 @@ child: Column(
     ),
   ),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 10.w,vertical: 10.h),
-     width: 260.w,
-          decoration: BoxDecoration(
-borderRadius: BorderRadius.only(bottomLeft: Radius.circular(16),bottomRight: Radius.circular(16)),
-color: Colors.black),
+//           padding: EdgeInsets.symmetric(horizontal: 10.w,vertical: 10.h),
+//      width: 260.w,
+//           decoration: BoxDecoration(
+// borderRadius: BorderRadius.only(bottomLeft: Radius.circular(16),bottomRight: Radius.circular(16)),
+// color: ColorsClass.instagramGray
+// ),
+
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+        decoration: BoxDecoration(
+          color:ColorsClass.instagramGray,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+            bottomLeft: Radius.circular(0),
+            bottomRight:  Radius.circular(20),
+          ),
+        ),
           child: Text(
             
                   msgModel.message.toString(),
             
-                  style: TextStyle(
-            
-                      fontSize: 17,
-            
-                      fontWeight: FontWeight.w400,
-            
-                      color: ColorsClass.primaryTextColorLight
-            
-                  )
+              style:Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.black)
             
               ),
         ),
@@ -430,12 +436,13 @@ class MyTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return                           Container(
+    
       //  padding: EdgeInsets.symmetric(horizontal: 20.w,vertical: 20.h),
 width: 260.w,
 // height: 58,
 
 child:Column(
-  crossAxisAlignment: CrossAxisAlignment.start,
+  crossAxisAlignment: CrossAxisAlignment.end,
   children: [
   if(msgModel.image !=null && msgModel.image !='')
   Container(
@@ -447,18 +454,28 @@ child:Column(
     ),
   ),
      Container(
-              padding: EdgeInsets.symmetric(horizontal: 10.w,vertical: 10.h),
-     width: 260.w,
-          decoration: const BoxDecoration(
-borderRadius: BorderRadius.only(bottomLeft: Radius.circular(16),bottomRight: Radius.circular(16)),
-color: Colors.blueAccent
+      // alignment: Alignment.centerRight,
+//               padding: EdgeInsets.symmetric(horizontal: 10.w,vertical: 10.h),
+//      width: 260.w,
+//           decoration:  BoxDecoration(
+// borderRadius: BorderRadius.only(bottomLeft: Radius.circular(16),bottomRight: Radius.circular(16)),
+// // color: Colors.blueAccent
+//   color: Theme.of(context).accentColor,
+//           ),
+  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+        decoration: BoxDecoration(
+          color: ColorsClass.instagramBlue ,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+            bottomLeft:  Radius.circular(20) ,
+            bottomRight: Radius.circular(0) 
           ),
+        ),
        child: Text(
               msgModel.message.toString(),
-              style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w400,
-              )
+              style:Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.white)
           ),
      ),
 
