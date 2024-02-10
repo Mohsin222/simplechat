@@ -10,12 +10,15 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../model/msg_model.dart';
+import '../services/socket/socketClass.dart';
 
 class MessageProvider extends  ChangeNotifier {
   List<MsgModel> messagesList =[];
    RoomModel? roomModel =RoomModel();
         MessageService messageService =MessageService();
       late IO.Socket socket;
+
+
        getMessageChart({required String clientId , required UserModel userModel})async{
     log('aaaaaaaaaaaaaaa');
      MessageService messageService =MessageService();

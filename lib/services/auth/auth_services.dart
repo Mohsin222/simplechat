@@ -9,6 +9,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../model/room_mode.dart';
+
 const baseURl = "http://192.168.18.72:5000/";
 
 class AuthServices {
@@ -57,38 +59,91 @@ class AuthServices {
     });
   }
 
-  Future<List<UserModel>> getAllUser(
-      {required String userid, required BuildContext context}) async {
+//   Future<List<UserModel>> getAllUser(
+//       {required String userid, required BuildContext context}) async {
+//         var token =    SharedPreferencesService.getAuthToken(); 
+//     List<UserModel> users = [];
+//     log(userid.toString() +'GGGGGGGGGGGGGGG');
+
+// var headers = {
+//   'Authorization': 'Bearer $token'
+// };
+//     return dio
+//         .get(
+//       baseURl + "api/auth/allusers/6591d45b2f746f417b5a4efc",
+//       options: Options(
+
+//         headers: headers
+//       )
+//     )
+//         .then((value) {
+//       var list = value.data as List;
+// print(list);
+//       for (var element in list) {
+//         UserModel userModel = UserModel.fromJson(element);
+
+//         users.add(userModel);
+//       }
+//       return users;
+//     }).catchError((e) {
+//       Provider.of<AuthProvider>(context, listen: false).isLoading = false;
+//       log(e.toString());
+//       //  throw Exception('error');
+//     });
+//   }
+//get my allChats
+  Future<List<RoomModel> >getMyAllChats(
+      {required BuildContext context}) async {
         var token =    SharedPreferencesService.getAuthToken(); 
-    List<UserModel> users = [];
-    log(userid.toString() +'GGGGGGGGGGGGGGG');
+    
+List<RoomModel> rooms =[];
 
 var headers = {
   'Authorization': 'Bearer $token'
 };
     return dio
         .get(
-      baseURl + "api/auth/allusers/6591d45b2f746f417b5a4efc",
+      // baseURl + "api/auth/allusers/6591d45b2f746f417b5a4efc",
+            baseURl + "api/messages/getAllMyRoom",
+
       options: Options(
 
         headers: headers
       )
     )
         .then((value) {
-      var list = value.data as List;
+       
+
+           var list = value.data['data'] as List;
 print(list);
       for (var element in list) {
-        UserModel userModel = UserModel.fromJson(element);
+      RoomModel roomModel = RoomModel.fromJson(element);
 
-        users.add(userModel);
+        rooms.add(roomModel);
       }
-      return users;
+
+
+
+      return rooms;
     }).catchError((e) {
       Provider.of<AuthProvider>(context, listen: false).isLoading = false;
       log(e.toString());
       //  throw Exception('error');
     });
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //register
   Future<UserModel> register(
@@ -109,6 +164,39 @@ print(list);
     }).catchError((e) {
       Provider.of<AuthProvider>(context, listen: false).isLoading = false;
       print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa2345677');
+      return Exception('error');
+    });
+  }
+
+
+
+
+    Future<UserModel> getUserDetails({
+
+      required BuildContext context}) async {
+        print('aaaaaaaaaaaa');
+    Dio dio = Dio();
+        var token =    SharedPreferencesService.getAuthToken(); 
+
+    var headers = {
+  'Authorization': 'Bearer $token'
+};   
+    return dio.get(baseURl + "api/user/getUserData/",
+    
+          options: Options(
+
+        headers: headers
+      )
+    
+    ).then((value) {
+
+      log(value.data.toString());
+      UserModel userModel = UserModel.fromJson(value.data['user']);
+
+      return userModel;
+    }).catchError((e) {
+      Provider.of<AuthProvider>(context, listen: false).isLoading = false;
+      print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa2345677' +e.toString());
       return Exception('error');
     });
   }

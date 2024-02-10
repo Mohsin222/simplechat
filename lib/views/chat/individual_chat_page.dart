@@ -34,364 +34,372 @@ class _IndividualChatPageState extends State<IndividualChatPage> {
   late IO.Socket socket;
   final TextEditingController _messageInputController = TextEditingController();
 
+  _sendMessage() async {
+    var msgProv = Provider.of<MessageProvider>(context, listen: false);
+    UserModel userModel =
+        Provider.of<AuthProvider>(context, listen: false).userModel;
+    MessageService messageService = MessageService();
+    await Provider.of<MessageProvider>(context, listen: false).sendMessage(
+        clientId: widget.userModel!.sId!,
+        userModel: userModel,
+        message: _messageInputController.text.trim());
 
-    _sendMessage() async{
-      var msgProv =Provider.of<MessageProvider>(context, listen: false);
-   UserModel userModel=   Provider.of<AuthProvider>(context, listen: false).userModel;
-    MessageService messageService =MessageService();
-   await Provider.of<MessageProvider>(context, listen: false).sendMessage(clientId: widget.userModel!.sId!,userModel:userModel ,  message: _messageInputController.text.trim());
+    _messageInputController.clear();
 
-
- 
-
- 
-//     Provider.of<MessageProvider>(context, listen: false).addNewMessage(
-
-// MsgModel(message:  _messageInputController.text.trim(),
-// fromSelf: true,
-// image: ''
-
-// )
-//       );
-         _messageInputController.clear();
-
-        //  msgProv.makeImageNull();
-
+    //  msgProv.makeImageNull();
   }
-@override
-  void initState() {
 
-    
-     var msgProv =Provider.of<MessageProvider>(context, listen: false);
+  @override
+  void initState() {
+    var msgProv = Provider.of<MessageProvider>(context, listen: false);
 
     super.initState();
     //Important: If your server is running on localhost and you are testing your app on Android then replace http://localhost:3000 with http://10.0.2.2:3000
     socket = IO.io(
-      Platform.isIOS ? 'http://192.168.18.72:5000' : 'http://192.168.18.72:5000',
- <String, dynamic>{
-      "transports": ["websocket"],
-      "autoConnect": true,
-    }
+        Platform.isIOS
+            ? 'http://192.168.18.72:5000'
+            : 'http://192.168.18.72:5000',
+        <String, dynamic>{
+          "transports": ["websocket"],
+          "autoConnect": true,
+        });
 
-      // IO.OptionBuilder().setTransports(['websocket'],
-      // )
-      // .setQuery(
-      //     {'username': widget.userModel!.username}).build(),
-    );
-      msgProv.socket=socket;
-socket.connect();
+    msgProv.socket = socket;
+    socket.connect();
     _connectSocket();
-   UserModel userModel=   Provider.of<AuthProvider>(context, listen: false).userModel;
-      WidgetsBinding.instance.addPostFrameCallback((_)  => {
-
-Provider.of<MessageProvider>(context,listen:false).getMessageChart(clientId: widget.userModel!.sId!,
-userModel: userModel
-
-)
-    
-  });
+    UserModel userModel =
+        Provider.of<AuthProvider>(context, listen: false).userModel;
+    WidgetsBinding.instance.addPostFrameCallback((_) => {
+          Provider.of<MessageProvider>(context, listen: false).getMessageChart(
+              clientId: widget.userModel!.sId!, userModel: userModel)
+        });
   }
-  _connectSocket() {
-      var msgProv =Provider.of<MessageProvider>(context, listen: false);
-   
- 
-   msgProv.socket.onConnectError((data) { print('Connect Error: $data');
-    log('Connect Error');
-          // ScaffoldMessenger.of(context).showSnackBar(snackbar(data));
-    }
-    );
-    msgProv.socket.onDisconnect((data) {
-      
-  log('DISCONNECT');
 
-  
-          // ScaffoldMessenger.of(context).showSnackBar(snackbar(data));
+  _connectSocket() {
+    var msgProv = Provider.of<MessageProvider>(context, listen: false);
+
+    msgProv.socket.onConnectError((data) {
+      print('Connect Error: $data');
+      log('Connect Error');
+      // ScaffoldMessenger.of(context).showSnackBar(snackbar(data));
+    });
+    msgProv.socket.onDisconnect((data) {
+      log('DISCONNECT');
+
+      // ScaffoldMessenger.of(context).showSnackBar(snackbar(data));
     });
     msgProv.socket.emit("add-user", msgProv.roomModel!.sId);
 // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Connected')));
-     msgProv.socket.onConnect((data) {
-        log('Connection established');
-      print('Connection established');
 
-      msgProv.socket.on("userConnected",(d){
+
+   
+    msgProv.socket.onConnect((data) {
+      // updateOnlineStatus();
+      log('Connection established');
+      print('Connection established');
+  String? id =Provider.of<AuthProvider>(context, listen: false).userModel.sId;
+  socket.emit('OnlineUser',id);
+socket.on('AllOnlineUsers',(data){
+
+  log(data.toString()+"####");
+    var d =data as List;
+for (var i = 0; i < d.length; i++) {
+
+  log(data.toString());
+  if(data[i]['userId']== widget.userModel!.sId){
+    log("MATCHEDDDD");
+    widget.userModel!.isOnline=true;
+  }else{
+      widget.userModel!.isOnline=false;
+    log('++++++++++++++++++++++++++++++++++++++++++++++++++---');
+  }
+
+  
+}
+
+setState(() {
+  
+});
+});
+
+
+
+      msgProv.socket.on("userConnected", (d) {
         log(d.toString());
       });
-       msgProv.socket.on("msg-recieve",
-   (dd){
 
-
-    log('GET MESSAGE'+dd['message'].toString());
+      msgProv.socket.on("msg-recieve", (dd) {
+        log('GET MESSAGE' + dd['message'].toString());
 //     Provider.of<AuthProvider>(context, listen: false).addNewMessage(
- MsgModel msgModel=MsgModel(message:  dd['message'],
-fromSelf: false,
-image: dd['image'] ?? ''
-);
-msgProv.addNewMessage(
-msgModel
+        MsgModel msgModel = MsgModel(
+            message: dd['message'], fromSelf: false, image: dd['image'] ?? '');
+        msgProv.addNewMessage(msgModel);
 
-      );
-
-
-          // ScaffoldMessenger.of(context).showSnackBar(snackbar(dd['message']));
-
-         
-   }
-
-   );
-  
+        // ScaffoldMessenger.of(context).showSnackBar(snackbar(dd['message']));
+      });
     });
-
-
-    
   }
 
-   snackbar(String message){
+  snackbar(String message) {
     return SnackBar(
-            content:  Text(message),
-            backgroundColor: (Colors.black),
-            action: SnackBarAction(
-              label: 'dismiss',
-              onPressed: () {
-              },
-            ),
-          );
+      content: Text(message),
+      backgroundColor: (Colors.black),
+      action: SnackBarAction(
+        label: 'dismiss',
+        onPressed: () {},
+      ),
+    );
   }
 
+updateOnlineStatus(){
+  String? id =Provider.of<AuthProvider>(context, listen: false).userModel.sId;
+  socket.emit('OnlineUser','id');
+if(id !=null){
 
+}else{
+  log('MY ID IS NULL');
+}
+
+
+//  socket!.on('AllOnlineUsers',(data){
+//   Provider.of<AuthProvider>(context, listen: false).onlineUsersList =data;
+
+
+
+//  log(  Provider.of<AuthProvider>(context, listen: false).onlineUsersList.toString() +'---' );
+
+//    Provider.of<AuthProvider>(context, listen: false).checkOnlineUsersAndUpdadeStatus();
+//  });
+
+socket.on('AllOnlineUsers',(data){
+
+  Provider.of<AuthProvider>(context, listen: false).checkOnlineUsersAndUpdadeStatus();
+  log('CONNNEEEEEEEEEE');
+});
+}
 
 
 
   @override
   void dispose() {
-   _messageInputController.dispose();
-          // var msgProv =Provider.of<MessageProvider>(context, listen: false);
+    _messageInputController.dispose();
 
-    //  msgProv.socket.emit("disconnect", Provider.of<AuthProvider>(context,listen:false).userModel.sId);
-    
-    // TODO: implement dispose
     super.dispose();
-//  msgProv.socket.emit('disconnect',{
-//   "roomId":msgProv.roomModel!.sId
-//  });
-  //  msgProv.socket.dispose();
-      // WidgetsBinding.instance.addPostFrameCallback((_)  => {
 
-    // TODO: implement initState
-if(mounted){
-  socket.dispose();
-}
-  // });
+    if (mounted) {
+      socket.dispose();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-   final msgProvider = Provider.of<MessageProvider>(context,listen:false);
-   final authProvider = Provider.of<AuthProvider>(context,listen:false);
-    return  Scaffold(
+    final msgProvider = Provider.of<MessageProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    return Scaffold(
         //  backgroundColor: ColorsClass.backgroundColorDark,
-      // appBar: AppBar(title: Text(widget.userModel!.username ?? ''),
-      
-      // actions: [Text(msgProvider.roomModel!.sId.toString()),SizedBox(width: 10,)],
-      // ),
+        // appBar: AppBar(title: Text(widget.userModel!.username ?? ''),
 
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-                      Padding(
-                 padding:  EdgeInsets.symmetric(horizontal: 15.w ),
-                        child: InkWell(onTap: ()=>Navigator.pop(context), child: Icon(Icons.arrow_back,color: Colors.white,)),
-                      ),
+        // actions: [Text(msgProvider.roomModel!.sId.toString()),SizedBox(width: 10,)],
+        // ),
 
+        body: SafeArea(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Padding(
-                  padding:  EdgeInsets.symmetric(horizontal: 15.w,vertical: 10, ),
+              padding: EdgeInsets.symmetric(horizontal: 15.w),
+              child: InkWell(
+                  onTap: () => Navigator.pop(context),
+                  child: Icon(
+                    Icons.arrow_back,
+                    color: Colors.white,
+                  )),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: 15.w,
+                vertical: 10,
+              ),
               // child: UserTile(onPress: (){},userModel: widget.userModel,
               // // height:100.h,
               // // width: 70.h,
               // ),
               child: Row(
                 children: [
-                 Container(
-          width: 100.w,
-        height: 100.h,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.amberAccent,
-          
-        ),
-          clipBehavior: Clip.hardEdge,
-        child: Image(image: NetworkImage('https://images.unsplash.com/photo-1704027115927-9f67ab4e39dc?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw2NHx8fGVufDB8fHx8fA%3D%3D'),fit: BoxFit.cover,),
-            ), 
-            Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-             crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-
-             Text(
-widget.userModel!.username.toString(),
-        style: TextStyle(
-        fontSize: 22.sp,
-        // color: ColorsClass.primaryTextColorDark,
-        color: ColorsClass.textColor2,
-        fontWeight: FontWeight.w500,
-        )
-        ),
-        SizedBox(height: 10.h,),
-         Text(
-       widget.userModel!.email.toString(),
-        style: TextStyle(
-        fontSize: 16.sp,
-        // color: ColorsClass.primaryTextColorDark,
-        color: ColorsClass.textColor2,
-        fontWeight: FontWeight.w500,
-        )
-        ),
-          ],
-            )
+                  Container(
+                    width: 100.w,
+                    height: 100.h,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.amberAccent,
+                    ),
+                    clipBehavior: Clip.hardEdge,
+                    child: const Image(
+                      image: NetworkImage(
+                          'https://images.unsplash.com/photo-1704027115927-9f67ab4e39dc?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw2NHx8fGVufDB8fHx8fA%3D%3D'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(widget.userModel!.username.toString(),
+                          style: TextStyle(
+                            fontSize: 22.sp,
+                            // color: ColorsClass.primaryTextColorDark,
+                            // color: ColorsClass.textColor2,
+                            color: widget.userModel!.isOnline==true ?Colors.green: ColorsClass.primaryColor,
+                            fontWeight: FontWeight.w500,
+                          )),
+                      SizedBox(
+                        height: 10.h,
+                      ),
+                      Text(widget.userModel!.email.toString(),
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            // color: ColorsClass.primaryTextColorDark,
+                            color: ColorsClass.textColor2,
+                            fontWeight: FontWeight.w500,
+                          )),
+                    ],
+                  )
                 ],
               ),
             ),
-          
-             
-                CustomMainBottomSheet(
-                  
-                  height: 0.7.sh,
-                  child: Consumer<MessageProvider>(
-                    builder: (_, provider, __) => ListView.separated(
-             
-                      padding: const EdgeInsets.all(16),
-                      itemBuilder: (context, index) {
-                        final message = provider.messagesList[index];
-                              
-                           
-                        print(message.image);
-                        return Wrap(
-                          alignment: message.fromSelf ==true
-                              ? WrapAlignment.end
-                              : WrapAlignment.start,
-                          children: [
-        
-                           if(message.fromSelf==true)
-        MyTile(msgModel: message)
-        else
-        ClientTile(msgModel: message),
-              
-             
-                          ],
-                        );
-                      },
-                      separatorBuilder: (_, index) =>  SizedBox(
-                        height: 10.h,
-                      ),
-                      itemCount: provider.messagesList.length,
-                    ),
-                  ),
-                ),
-           
+            CustomMainBottomSheet(
+              height: 0.7.sh,
+              child: Consumer<MessageProvider>(
+                builder: (_, provider, __) => ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemBuilder: (context, index) {
+                    final message = provider.messagesList[index];
 
-
-
-                      Container(
-            
-                decoration: BoxDecoration(
-
-     borderRadius: BorderRadius.only(topRight: Radius.circular(10.r),topLeft: Radius.circular(10.r)),
-                          // border: Border.all(color: Colors.black),
-                  color: Colors.white,
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                ),
-                child: SafeArea(
-                  child: Column(
-                    children: [
-                       Consumer<MessageProvider>(
-                builder: (context,val,_) {
-                  return val.image !=null ? GestureDetector(
-                  onLongPress: (){
-                    val.makeImageNull();
+                    print(message.image);
+                    return Wrap(
+                      alignment: message.fromSelf == true
+                          ? WrapAlignment.end
+                          : WrapAlignment.start,
+                      children: [
+                        if (message.fromSelf == true)
+                          MyTile(msgModel: message)
+                        else
+                          ClientTile(msgModel: message),
+                      ],
+                    );
                   },
-                    child: Container(
-                      height: 100,
-                      width: 90,
-                      child: Image.file(val.image!)),
-                  ):Container();
-                }
+                  separatorBuilder: (_, index) => SizedBox(
+                    height: 10.h,
+                  ),
+                  itemCount: provider.messagesList.length,
+                ),
               ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _messageInputController,
-                              decoration: const InputDecoration(
-                                hintText: 'Type your message here...',
-                                border: InputBorder.none,
-                              ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(10.r),
+                    topLeft: Radius.circular(10.r)),
+                // border: Border.all(color: Colors.black),
+                color: Colors.white,
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+              ),
+              child: SafeArea(
+                child: Column(
+                  children: [
+                    Consumer<MessageProvider>(builder: (context, val, _) {
+                      return val.image != null
+                          ? GestureDetector(
+                              onLongPress: () {
+                                val.makeImageNull();
+                              },
+                              child: Container(
+                                  height: 100,
+                                  width: 90,
+                                  child: Image.file(val.image!)),
+                            )
+                          : Container();
+                    }),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _messageInputController,
+                            decoration: const InputDecoration(
+                              hintText: 'Type your message here...',
+                              border: InputBorder.none,
                             ),
                           ),
-                               IconButton(
-                            onPressed: ()async {
+                        ),
+                        IconButton(
+                          onPressed: () async {
                             showModalBottomSheet(
-                            context: context,
-                            builder: (context) {
-                              return BottomSheetWidget(onpress: ()async{
-                               await msgProvider.openImagePicker(context);
-                              },);
-                            });
-                            },
-                            icon: const Icon(Icons.image),
-                          ),
-                          IconButton(
-                            onPressed: ()async {
-                              if (_messageInputController.text.trim().isNotEmpty) {
-                            await    _sendMessage();
-                              }
-                            },
-                            icon: const Icon(Icons.send),
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
+                                context: context,
+                                builder: (context) {
+                                  return BottomSheetWidget(
+                                    onpress: () async {
+                                      await msgProvider
+                                          .openImagePicker(context);
+                                    },
+                                  );
+                                });
+                          },
+                          icon: const Icon(Icons.image),
+                        ),
+                        IconButton(
+                          onPressed: () async {
+                            if (_messageInputController.text
+                                .trim()
+                                .isNotEmpty) {
+                              await _sendMessage();
+                            }
+                          },
+                          icon: const Icon(Icons.send),
+                        )
+                      ],
+                    ),
+                  ],
                 ),
-              )
-          ],),
+              ),
+            )
+          ],
         ),
-      )
-    );
+      ),
+    ));
   }
-
 }
 
-
-
 class ClientTile extends StatelessWidget {
- final MsgModel msgModel;
-    
+  final MsgModel msgModel;
+
   const ClientTile({super.key, required this.msgModel});
 
   @override
   Widget build(BuildContext context) {
-    return                           Container(
-    // padding: EdgeInsets.symmetric(horizontal: 20.w,vertical: 20.h),
-width: 260.w,
+    return Container(
+      // padding: EdgeInsets.symmetric(horizontal: 20.w,vertical: 20.h),
+      width: 260.w,
 // height: 58,
 
-alignment: Alignment.centerLeft,
-child: Column(
-  crossAxisAlignment: CrossAxisAlignment.end,
-  children: [
-      if(msgModel.image !=null && msgModel.image !='')
-  Container(
-    child: Image(image: NetworkImage(msgModel.image!,),
-    
-    errorBuilder: (context, error, stackTrace) {
-      return Image.asset('assets/images/image.png');
-    },
-    ),
-  ),
-        Container(
+      alignment: Alignment.centerLeft,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          if (msgModel.image != null && msgModel.image != '')
+            Container(
+              child: Image(
+                image: NetworkImage(
+                  msgModel.image!,
+                ),
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.asset('assets/images/image.png');
+                },
+              ),
+            ),
+          Container(
 //           padding: EdgeInsets.symmetric(horizontal: 10.w,vertical: 10.h),
 //      width: 260.w,
 //           decoration: BoxDecoration(
@@ -399,62 +407,58 @@ child: Column(
 // color: ColorsClass.instagramGray
 // ),
 
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-        decoration: BoxDecoration(
-          color:ColorsClass.instagramGray,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-            bottomLeft: Radius.circular(0),
-            bottomRight:  Radius.circular(20),
-          ),
-        ),
-          child: Text(
-            
-                  msgModel.message.toString(),
-            
-              style:Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.black)
-            
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+            decoration: BoxDecoration(
+              color: ColorsClass.instagramGray,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+                bottomLeft: Radius.circular(0),
+                bottomRight: Radius.circular(20),
               ),
-        ),
-  ],
-),
-
-
-);
+            ),
+            child: Text(msgModel.message.toString(),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall!
+                    .copyWith(color: Colors.black)),
+          ),
+        ],
+      ),
+    );
   }
 }
 
-
-
 class MyTile extends StatelessWidget {
- final MsgModel msgModel;
-    
+  final MsgModel msgModel;
+
   const MyTile({super.key, required this.msgModel});
 
   @override
   Widget build(BuildContext context) {
-    return                           Container(
-    
-      //  padding: EdgeInsets.symmetric(horizontal: 20.w,vertical: 20.h),
-width: 260.w,
+    return Container(
+
+        //  padding: EdgeInsets.symmetric(horizontal: 20.w,vertical: 20.h),
+        width: 260.w,
 // height: 58,
 
-child:Column(
-  crossAxisAlignment: CrossAxisAlignment.end,
-  children: [
-  if(msgModel.image !=null && msgModel.image !='')
-  Container(
-    child: Image(image: NetworkImage(msgModel.image!,),
-    
-    errorBuilder: (context, error, stackTrace) {
-      return Image.asset('assets/images/image.png');
-    },
-    ),
-  ),
-     Container(
-      // alignment: Alignment.centerRight,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            if (msgModel.image != null && msgModel.image != '')
+              Container(
+                child: Image(
+                  image: NetworkImage(
+                    msgModel.image!,
+                  ),
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset('assets/images/image.png');
+                  },
+                ),
+              ),
+            Container(
+              // alignment: Alignment.centerRight,
 //               padding: EdgeInsets.symmetric(horizontal: 10.w,vertical: 10.h),
 //      width: 260.w,
 //           decoration:  BoxDecoration(
@@ -462,36 +466,31 @@ child:Column(
 // // color: Colors.blueAccent
 //   color: Theme.of(context).accentColor,
 //           ),
-  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-        decoration: BoxDecoration(
-          color: ColorsClass.instagramBlue ,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-            bottomLeft:  Radius.circular(20) ,
-            bottomRight: Radius.circular(0) 
-          ),
-        ),
-       child: Text(
-              msgModel.message.toString(),
-              style:Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.white)
-          ),
-     ),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+              decoration: BoxDecoration(
+                color: ColorsClass.instagramBlue,
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(0)),
+              ),
+              child: Text(msgModel.message.toString(),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall!
+                      .copyWith(color: Colors.white)),
+            ),
 
-    //  Text(
-    //         msgModel.message.toString(),
-    //         style: TextStyle(
-    //             fontSize: 17,
-    //             fontWeight: FontWeight.w400,
-    //         )
-    //     ),
-
-  ],
-)
-
-);
+            //  Text(
+            //         msgModel.message.toString(),
+            //         style: TextStyle(
+            //             fontSize: 17,
+            //             fontWeight: FontWeight.w400,
+            //         )
+            //     ),
+          ],
+        ));
   }
 }
-
-

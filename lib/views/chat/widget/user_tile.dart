@@ -42,7 +42,15 @@ decoration: BoxDecoration(
   
 ),
   clipBehavior: Clip.hardEdge,
-child: Image(image: NetworkImage('https://images.unsplash.com/photo-1704027115927-9f67ab4e39dc?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw2NHx8fGVufDB8fHx8fA%3D%3D'),fit: BoxFit.cover,),
+child: Image(image: NetworkImage( userModel?.avatarImage ?? '',
+
+
+),fit: BoxFit.cover,
+
+errorBuilder: (context, error, stackTrace) {
+  return Text('NO Image');
+},
+),
       ),
     title:  Text(
 userModel!.username ?? '',

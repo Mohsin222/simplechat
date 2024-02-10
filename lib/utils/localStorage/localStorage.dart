@@ -49,7 +49,7 @@ static Future<void> saveAuthToken(String token)async{
   }
 
   // Clear all data from shared preferences
-  Future<void> clearAllData() async {
+static Future<void> clearAllData() async {
     await _preferences.clear();
   }
 }

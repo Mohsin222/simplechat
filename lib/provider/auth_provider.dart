@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:chatapp2/model/msg_model.dart';
+import 'package:chatapp2/model/room_mode.dart';
 import 'package:chatapp2/model/user_model.dart';
 import 'package:chatapp2/services/auth/auth_services.dart';
 import 'package:flutter/material.dart';
@@ -33,9 +34,13 @@ late TextEditingController emailController;
  late TextEditingController passwordController ;
   late  TextEditingController userNameController;
 
-UserModel userModel = UserModel();
-  List<UserModel> usersList= [];
 
+  //online users List 
+  List<dynamic> onlineUsersList= [];
+
+UserModel userModel = UserModel();
+  // List<UserModel> usersList= [];
+  List<RoomModel> roomsList= [];
 
    AuthProvider(){
     emailController = TextEditingController();
@@ -60,7 +65,7 @@ login({required String email ,required String password,required BuildContext con
   userModel = value;
  
 if(userModel.sId !=null)
- await allUsers(context: context);
+ await AllMyChats(context: context);
  print(userModel.email.toString() + userModel.username.toString());
       //  notifyListeners();
     });
@@ -68,13 +73,13 @@ if(userModel.sId !=null)
   }
 
 
-       allUsers({required BuildContext context})async{
+       AllMyChats({required BuildContext context})async{
     log('aaaaaaaaaaaaaaa');
        AuthServices authServices =AuthServices();
 
-    await authServices.getAllUser(userid:  userModel.sId.toString(),context: context).then((value){
+    await authServices.getMyAllChats(context: context).then((value){
 
- usersList.assignAll(value);
+ roomsList.assignAll(value);
 
 
        notifyListeners();
@@ -97,7 +102,7 @@ register({required String email ,required String password, required String usern
     await authServices.register(email:email,username :username,password: password,  context: context).then((value)async{
 userModel = value;
  
- await allUsers(context: context);
+ await AllMyChats(context: context);
  print(userModel.email.toString() + userModel.username.toString());
       //  notifyListeners();
     });
@@ -105,6 +110,40 @@ userModel = value;
   }
 
 
+
+  getUserDetails(BuildContext context)async{
+await _getUserDetails(context);
+  }
+
+
+  _getUserDetails(BuildContext context)async{
+    
+       AuthServices authServices =AuthServices();
+
+    await authServices.getUserDetails(context: context).then((value)async{
+  userModel = value;
+//  notifyListeners();
+if(userModel.sId !=null)
+ await AllMyChats(context: context);
+ print(userModel.email.toString() + userModel.username.toString());
+       notifyListeners();
+    });
+  }
+
+
+
+
+checkOnlineUsersAndUpdadeStatus(){
+// for (var i = 0; i < usersList.length; i++) {
+//   for (var j = 0; j < onlineUsersList.length; j++) {
+//     if(usersList[i].sId == onlineUsersList[j]['userId']){
+// usersList[i].isOnline=true;
+//     }else{
+//       log('not Matcj');
+//     }
+//   }
+// }
+}
 
 
 

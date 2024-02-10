@@ -3,6 +3,8 @@ import 'package:chatapp2/constants/text_file.dart';
 import 'package:chatapp2/model/user_model.dart';
 import 'package:chatapp2/provider/auth_provider.dart';
 import 'package:chatapp2/provider/message_provider.dart';
+import 'package:chatapp2/services/auth/auth_services.dart';
+import 'package:chatapp2/views/auth/start_screen.dart';
 import 'package:chatapp2/views/chat/individual_chat_page.dart';
 import 'package:chatapp2/views/chat/widget/user_tile.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +14,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 import '../../services/message_services/message_service.dart';
+import '../../services/socket/socketClass.dart';
+import '../../utils/localStorage/localStorage.dart';
 import '../auth/widget/auth_bottom_sheet.dart';
 
 class MainScreen extends StatefulWidget {
@@ -22,15 +26,23 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-// @override
-//   void initState() {
-//     // TODO: implement initState
-//     super.initState();
+  
+   SocketService _socketService = SocketService();
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
 //       WidgetsBinding.instance.addPostFrameCallback((_){
 // Provider.of<AuthProvider>(context, listen: false).allUsers();
 //   });
-//   }
 
+    // _socketService.connect(context);
+  }
+  @override
+  void dispose() {
+    // _socketService.disconnect();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,7 +73,16 @@ class _MainScreenState extends State<MainScreen> {
           ],
         ),
         actions: [
-          IconButton(onPressed: () {}, icon: Icon(Icons.notification_add))
+          IconButton(onPressed: ()async {
+
+            //  AuthServices authServices =AuthServices();
+          // await   authServices.getMyAllChats( context: context);
+
+   await       SharedPreferencesService.clearAllData().then((value) {
+    Navigator.popUntil(context,ModalRoute.withName('/'));
+    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => StartScreen(),));
+   });
+          }, icon: Icon(Icons.logout))
         ],
       ),
       // body: Consumer<AuthProvider>(
@@ -147,6 +168,9 @@ body :NestedScrollView(
                         children: [
                           Text(ConstantTexts.chatHeading,
                               style: Theme.of(context).textTheme.headlineSmall!.copyWith(   fontWeight: FontWeight.w600,color: Colors.red),),
+                  
+                    SizedBox(height: 15.h,),
+                    
                           Expanded(
                             child: ListView.builder(
               // controller: scrollController,
@@ -154,11 +178,11 @@ body :NestedScrollView(
               
                                 shrinkWrap: true,
                                 cacheExtent: 100.h,
-                                itemCount: val.usersList.length,
+                                itemCount: val.roomsList.length,
                                 itemBuilder: (context, index) {
                                   return UserTile(
                                     
-                                    userModel: val.usersList[index],
+                                    userModel: val.userModel.sId == val.roomsList[index].users!.first.sId ? val.roomsList[index].users![1]:val.roomsList[index].users![0],
                                     onPress: () async {
                                       final authProv = Provider.of<AuthProvider>(
                                           context,
@@ -171,16 +195,20 @@ body :NestedScrollView(
                                       // MessageService messageService =MessageService();
               
                                       await msgProv.getRoomId(
-                                          clinetModel: val.usersList[index],
+                                          clinetModel: val.userModel.sId == val.roomsList[index].users!.first.sId ? val.roomsList[index].users![1]:val.roomsList[index].users![0],
                                           myModel: authProv.userModel);
               
+                                      // ignore: use_build_context_synchronously
                                       Navigator.push(
                                           context,
                                           MaterialPageRoute(
                                               builder: (context) =>
                                                   IndividualChatPage(
-                                                    userModel: val.usersList[index],
-                                                  )));
+                                                    // userModel: val.usersList[index],
+                                                    userModel:  val.userModel.sId == val.roomsList[index].users!.first.sId ? val.roomsList[index].users![1]:val.roomsList[index].users![0],
+
+                                                    // mySocket: _socketService.socket!,
+                                                )));
                                     },
                                   );
                                 }),
@@ -327,95 +355,95 @@ body :NestedScrollView(
     );
   }
 }
-class MyHomePage extends StatelessWidget {
-  // final _controller = DraggableScrollableController();
-  //   final _sheet = GlobalKey();
-  //  ScrollController _scrollController = ScrollController();
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        decoration: BoxDecoration(
-        color: Colors.blueGrey[100],
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20.0),
-          topRight: Radius.circular(20.0),
-        ),
-      ),
-      child: DraggableScrollableSheet(
-// key: _sheet,
-    snapAnimationDuration: Duration(seconds: 2),
-        expand: false,
+// class MyHomePage extends StatelessWidget {
+//   // final _controller = DraggableScrollableController();
+//   //   final _sheet = GlobalKey();
+//   //  ScrollController _scrollController = ScrollController();
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//         decoration: BoxDecoration(
+//         color: Colors.blueGrey[100],
+//         borderRadius: BorderRadius.only(
+//           topLeft: Radius.circular(20.0),
+//           topRight: Radius.circular(20.0),
+//         ),
+//       ),
+//       child: DraggableScrollableSheet(
+// // key: _sheet,
+//     snapAnimationDuration: Duration(seconds: 2),
+//         expand: false,
      
-  // snapSizes: [
-  //       60 / 1.sh,
-  //       0.5,
-  //     ],
-        initialChildSize: 0.90, // initial size of the sheet (as a fraction of screen height)
-         minChildSize: 0.90, // minimum size of the sheet when fully collapsed
-        maxChildSize:1, // maximum size of the sheet when fully expanded
-        builder: (BuildContext context, ScrollController scrollController) {
-          return    MediaQuery.removePadding(
-            removeTop: true,
-            context: context,
+//   // snapSizes: [
+//   //       60 / 1.sh,
+//   //       0.5,
+//   //     ],
+//         initialChildSize: 0.90, // initial size of the sheet (as a fraction of screen height)
+//          minChildSize: 0.90, // minimum size of the sheet when fully collapsed
+//         maxChildSize:1, // maximum size of the sheet when fully expanded
+//         builder: (BuildContext context, ScrollController scrollController) {
+//           return    MediaQuery.removePadding(
+//             removeTop: true,
+//             context: context,
             
-            child: Consumer<AuthProvider>(builder: (context, val, _) {
-                    return Container(
-                        //  color: Colors.black,
-                      padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
-                      child: Column(
+//             child: Consumer<AuthProvider>(builder: (context, val, _) {
+//                     return Container(
+//                         //  color: Colors.black,
+//                       padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
+//                       child: Column(
                 
-                        crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
+//                         crossAxisAlignment: CrossAxisAlignment.start,
+//               mainAxisAlignment: MainAxisAlignment.start,
+//                         mainAxisSize: MainAxisSize.min,
               
-                        children: [
-                          Text(ConstantTexts.chatHeading,
-                              style: Theme.of(context).textTheme.headlineSmall!.copyWith(   fontWeight: FontWeight.w600,color: Colors.red),),
-                          Expanded(
-                            child: ListView.builder(
-              controller: scrollController,
-                                // physics: NeverScrollableScrollPhysics(),
+//                         children: [
+//                           Text(ConstantTexts.chatHeading,
+//                               style: Theme.of(context).textTheme.headlineSmall!.copyWith(   fontWeight: FontWeight.w600,color: Colors.red),),
+//                           Expanded(
+//                             child: ListView.builder(
+//               controller: scrollController,
+//                                 // physics: NeverScrollableScrollPhysics(),
               
-                                shrinkWrap: true,
-                                cacheExtent: 100.h,
-                                itemCount: val.usersList.length,
-                                itemBuilder: (context, index) {
-                                  return UserTile(
+//                                 shrinkWrap: true,
+//                                 cacheExtent: 100.h,
+//                                 itemCount: val.usersList.length,
+//                                 itemBuilder: (context, index) {
+//                                   return UserTile(
                                     
-                                    userModel: val.usersList[index],
-                                    onPress: () async {
-                                      final authProv = Provider.of<AuthProvider>(
-                                          context,
-                                          listen: false);
+//                                     userModel: val.usersList[index],
+//                                     onPress: () async {
+//                                       final authProv = Provider.of<AuthProvider>(
+//                                           context,
+//                                           listen: false);
               
-                                      final msgProv = Provider.of<MessageProvider>(
-                                          context,
-                                          listen: false);
+//                                       final msgProv = Provider.of<MessageProvider>(
+//                                           context,
+//                                           listen: false);
               
-                                      // MessageService messageService =MessageService();
+//                                       // MessageService messageService =MessageService();
               
-                                      await msgProv.getRoomId(
-                                          clinetModel: val.usersList[index],
-                                          myModel: authProv.userModel);
+//                                       await msgProv.getRoomId(
+//                                           clinetModel: val.usersList[index],
+//                                           myModel: authProv.userModel);
               
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  IndividualChatPage(
-                                                    userModel: val.usersList[index],
-                                                  )));
-                                    },
-                                  );
-                                }),
-                          )
-                        ],
-                      ),
-                    );
-                  }),
-          );
-        },
-      ),
-    );
-  }
-}
+//                                       Navigator.push(
+//                                           context,
+//                                           MaterialPageRoute(
+//                                               builder: (context) =>
+//                                                   IndividualChatPage(
+//                                                     userModel: val.usersList[index],
+//                                                   )));
+//                                     },
+//                                   );
+//                                 }),
+//                           )
+//                         ],
+//                       ),
+//                     );
+//                   }),
+//           );
+//         },
+//       ),
+//     );
+//   }
+// }

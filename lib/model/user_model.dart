@@ -6,6 +6,8 @@ class UserModel {
   bool? isAvatarImageSet;
   String? avatarImage;
   int? iV;
+bool? isOnline;
+
 
   UserModel(
       {this.sId,
@@ -14,7 +16,10 @@ class UserModel {
       this.password,
       this.isAvatarImageSet,
       this.avatarImage,
-      this.iV});
+      this.iV,
+      this.isOnline
+      
+      });
 
   UserModel.fromJson(Map<String, dynamic> json) {
     sId = json['_id'] ?? '';
@@ -24,6 +29,7 @@ class UserModel {
     isAvatarImageSet = json['isAvatarImageSet'] ?? false;
     avatarImage = json['avatarImage'] ?? '';
     iV = json['__v'] ?? 0;
+     isOnline = json['onlineStatus'] ?? false;
   }
 
   Map<String, dynamic> toJson() {
