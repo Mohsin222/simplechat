@@ -47,3 +47,22 @@ try {
 
 }
   }
+
+
+
+  //find user
+  
+
+  module.exports.findUser = async (req, res) =>{
+
+    try {
+    console.log(req.userId)
+      const searchString = req.query.q;
+      const emails = await User.find({ email: { $regex: searchString, $options: 'i' } });
+    
+          return res.status(200).json({ status: true,user:emails });
+    } catch (error) {
+        return res.status(500).json({ status: false, error:error });
+    
+    }
+      }

@@ -115,8 +115,7 @@ try {
 module.exports.getRoom = async(req,res,next)=>{
   try {
 
-  
-  var find1 =await roomModel.find()
+  // var find1 =await roomModel.find()
   
 
 // var  find1 =await roomModel.find({
@@ -127,6 +126,16 @@ module.exports.getRoom = async(req,res,next)=>{
 // }
 
 // )
+const otherPersonId = req.query.id;
+var  find1 =await roomModel.find({
+$and:[
+  {"users._id":    req.userId
+},
+{"users._id":otherPersonId}
+]
+}
+
+)
  
     if (find1) return res.json({ msg: "rooms" ,data:find1});
     else return res.json({ msg: "Failed to create room",data:[] });
@@ -134,3 +143,38 @@ module.exports.getRoom = async(req,res,next)=>{
     res.status(500).json({error:error})
   }
   }
+
+
+  //get all my   rooms
+
+  module.exports.getAllMyRoom = async(req,res,next)=>{
+    try {
+  
+    // var find1 =await roomModel.find()
+    
+  
+  // var  find1 =await roomModel.find({
+  // $and:[
+  //   {"users.email":"mohsin@gmail.com"},
+  // {"users.email":"ali@gmail.com"}
+  // ]
+  // }
+  
+  // )
+  // const element = req.query.element;
+  var  find1 =await roomModel.find(
+    {
+ "users._id":req.userId
+    }
+  
+  )
+   
+      if (find1) return res.json({ msg: "rooms" ,data:find1});
+      else return res.json({ msg: "Failed to find rooms",data:[] });
+    } catch (error) {
+      res.status(500).json({error:error})
+    }
+    }
+
+
+    // $regex: searchString, $options: 'i' 

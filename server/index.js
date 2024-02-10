@@ -8,6 +8,7 @@ const app = express();
 // const socket = require("socket.io");
 const { Server } = require("socket.io");
 const http = require('http');
+const { on } = require("nodemon");
 
 require("dotenv").config();
 
@@ -53,18 +54,44 @@ app.use("/api/user", userRoute);
 
 // global.onlineUsers = new Map();
 
-var users =[]
+// var users =[]
+
+var onlineUsers=[]
+
+
 io.on("connection", (socket) => {
+
+
+  socket.on('OnlineUser',(data)=>{
+
+    console.log('ONLINE USERS ')
+    onlineUsers.push({
+      userId:data,
+      socketId:socket.id
+    })
+
+
+
+
+    console.log(onlineUsers[0].socketId.toString()+'###')
+    socket.emit('AllOnlineUsers',onlineUsers,);
+
+  })
+
+  // socket.emit('AllOnlineUsers',onlineUsers,);
+
+
 
 
   console.log('CONNECTED')
   global.chatSocket = socket;
+  console.log(socket.client+'aaaaaaaaaaaaaaa')
 
-
+  //for add user in room
   socket.on("add-user", (roomId) => {
     // onlineUsers.set(userId, socket.id);
 
-    console.log('USER CONNECTED')
+    console.log('USER CONNECTED   '+roomId)
     socket.join(roomId)
 
 
@@ -72,6 +99,8 @@ io.on("connection", (socket) => {
     io.to(roomId).emit("userConnected", 'New User');
   });
 
+
+  //for send messages
   socket.on("send-msg", (data) => {
 
 
@@ -93,8 +122,23 @@ io.on("connection", (socket) => {
     socket.to(data.roomId).emit("msg-recieve", data);
   });
 
+
+
+
+  //for disconnect
   socket.on('disconnect', (d) => {
-    console.log('DISCONNECTED')
+
+console.log('MTYYYYY   @@'  + socket.id)
+// onlineUsers.filter(user => user['socketIdy'] !== socket.id)
+for (let i = 0; i < onlineUsers.length; i++) {
+  if (onlineUsers[i].socketId === socket.id) {
+    onlineUsers.pop(i)
+
+    
+  }
+}
+socket.emit('AllOnlineUsers',onlineUsers,);
+    console.log('DISCONNECTED' + onlineUsers.length)
 
     // socket.leave(rommId)
     // const user = removeUser(socket.id)

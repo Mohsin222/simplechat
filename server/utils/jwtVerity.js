@@ -11,6 +11,9 @@ const checkToken = function (req,res,next)
 
        var decoded = jwt.verify(token, process.env.SECRETKEY);
        req.userId = decoded.userId
+
+
+       console.log(decoded.userId.toString()+'***111')
        next();
 
 
